@@ -525,7 +525,7 @@ function boop(p){try{actx=actx||new (window.AudioContext||window.webkitAudioCont
     g.gain.setValueAtTime(0.0001,t+dt);g.gain.exponentialRampToValueAtTime(0.18,t+dt+0.012);g.gain.exponentialRampToValueAtTime(0.0001,t+dt+0.16);
     o.connect(g).connect(actx.destination);o.start(t+dt);o.stop(t+dt+0.18)})}catch(e){}}
 function choosePart(p){SEL.part=p;if(BACKSIDE.has(p))wantView='back';else if(p!=='Legs')wantView='front';const list=partExercises(p);
-  if(!SEL.ex||grpOf(exById(SEL.ex)||{})!==p){if(list.length)loadDefaults(list[0].id);else{SEL.ex=null;SEL.picking=true}}
+  if(!SEL.ex||grpOf(exById(SEL.ex)||{})!==p){if(list.length)loadDefaults(list[0].id);else SEL.ex=null}
   shakeOnRender=true;render();}
 function stage(){
   const svg=(list,view)=>`<svg class="parts" viewBox="0 0 941 1111" aria-label="Tap a body part">${list.map(o=>`<g class="pt${SEL.part===o.p&&wantView===view?' on':''}" data-act="part" data-p="${o.p}" role="button" aria-label="${o.p}">${o.polys.map(pl=>`<path d="${smooth(pl)}"/>`).join('')}</g>`).join('')}</svg>`;
@@ -549,7 +549,7 @@ function consoleUI(){
   const rel=curDate===t?'Today':curDate===addDays(t,-1)?'Yesterday':fd(curDate,{weekday:'short',day:'numeric',month:'short'});
   let exRow;
   if(!SEL.part)exRow=`<div class="c-ex idle"><span class="c-hint">Tap a body part on Lifty to pick an exercise</span></div>`;
-  else if(!ex)exRow=`<button class="c-ex" data-act="pickEx">${gIcon(SEL.part,'sm')}<span class="c-nm">Choose a ${SEL.part.toLowerCase()} exercise</span><span class="c-chg">Pick</span></button>`;
+  else if(!ex)exRow=`<button class="c-ex" data-act="pickEx">${gIcon(SEL.part,'sm')}<span class="c-nm">${partExercises(SEL.part).length?'Choose a '+SEL.part.toLowerCase()+' exercise':'Add your first '+SEL.part.toLowerCase()+' exercise'}</span><span class="c-chg">${partExercises(SEL.part).length?'Pick':'+ Add'}</span></button>`;
   else{const le=lastEntry(ex.id,curDate);
     exRow=`<button class="c-ex" data-act="pickEx">${gIcon(SEL.part,'sm')}<span class="c-nm">${esc(ex.name)}<small>${le?'Last '+esc(fentry(ex,le))+' · '+esc(short(lastUsedBefore(ex.id))):'First time'}</small></span><span class="c-chg">Change<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span></button>`}
   const dis=!ex?' disabled':'';
@@ -873,7 +873,7 @@ function onClick(ev){
     else{e.reps=Math.max(0,(e.reps||0)+d);c.querySelector('.r-in').value=e.reps}
     refreshEntry(c,e);markDirty('d_'+curDate);return}
   if(a==='stepM'){const[c,e]=findEntry(b);if(!e)return;e.mins=Math.max(0,(e.mins||0)+(+b.dataset.d));c.querySelector('.m-in').value=e.mins;sizeIn(c.querySelector('.m-in'));markDirty('d_'+curDate);return}
-  if(a==='part'){const pp=b.dataset.p;boop(pp);if(SEL.part===pp){SEL.picking=true;render();return}SEL.ex=null;choosePart(pp);return}
+  if(a==='part'){const pp=b.dataset.p;boop(pp);if(SEL.part===pp){shakeOnRender=true;render();return}SEL.ex=null;choosePart(pp);return}
   if(a==='pickEx'){SEL.picking=true;render();return}
   if(a==='closePick'){SEL.picking=false;render();return}
   if(a==='pickOne'){loadDefaults(b.dataset.ex);SEL.picking=false;render();return}
